@@ -1,6 +1,6 @@
 import { isArray } from 'util';
 
-export const SERVER_PORT = 5432;
+export const SERVER_PORT = 6543;
 export const SERVER_URL = `http://127.0.0.1:${SERVER_PORT}/`;
 export const CANVAS_MAX_WIDTH = 800;
 export const CANVAS_MIN_WIDTH = 120;

@@ -10,11 +10,10 @@ def image_to_base64(filename: str):
 
 
 def random_images_to_base64(directory: str, num: int):
-    dirs = listdir(directory)
+    def join_dir(filename: str):
+        return path.join(directory, filename)
 
-    def is_file(d):
-        path.isfile(path.join(directory, d))
-
-    images = filter(is_file, dirs)
+    dirs = map(join_dir, listdir(directory))
+    images = list(filter(path.isfile, dirs))
     random.shuffle(images)
     return list(map(image_to_base64, images[:num]))

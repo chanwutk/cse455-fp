@@ -9,10 +9,10 @@ from src.utils import random_images_to_base64
 
 app = Flask(__name__)
 app.config["CORS_HEADERS"] = "Content-Type"
-cors = CORS(app, resources={
-    r"/classify": {"origins": "*"},
-    r"/example-images": {"origins": "*"}
-})
+cors = CORS(
+    app,
+    resources={r"/classify": {"origins": "*"}, r"/example-images": {"origins": "*"}},
+)
 
 cwd = os.getcwd()
 weights_path = os.path.join(cwd, "data/weights.pt")
@@ -36,12 +36,13 @@ def classify():
     return class_names[class_idx.item()]
 
 
-@app.route("/example-images/<is_normal_str>", methods=["GET"])
+@app.route("/example-images/<is_normal>/<n>", methods=["GET"])
 @cross_origin(origin="localhost", headers=["Content-Type"])
-def example_images(is_normal_str: str):
-    output_class = 0 if is_normal_str == "true" else 1
-    example_dir = "chest_xray/train/" + ("NORMAL" if output_class else "PNEUMONIA")
-    return jsonify(random_images_to_base64(os.path.join(dataset_dir, example_dir), 3))
+def example_images(is_normal: str, n: str):
+    example_dir = "train/" + ("NORMAL" if is_normal == "true" else "PNEUMONIA")
+    output = random_images_to_base64(os.path.join(dataset_dir, example_dir), int(n))
+    print(output)
+    return jsonify(output)
 
 
 if __name__ == "__main__":

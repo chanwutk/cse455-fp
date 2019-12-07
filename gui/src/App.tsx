@@ -1,15 +1,8 @@
 import React from 'react';
 import './App.css';
-import NetworkVisualization from './components/NetworkVisualization';
 import UploadButton from './components/UploadButton';
-import {
-  CANVAS_MAX_WIDTH,
-  makeRequest,
-  parseNetworkLayout,
-  layerThinDivStyle,
-  drawArrow,
-  layerRootStyle,
-} from './utils';
+import { CANVAS_MAX_WIDTH, makeRequest, drawArrow } from './utils';
+import ExampleImages from './components/ExampleImages';
 
 const rootStyle: React.CSSProperties = {
   width: '100%',
@@ -26,18 +19,23 @@ const bodyStyle: React.CSSProperties = {
   justifyContent: 'center',
 };
 
+const blockStyle: React.CSSProperties = {
+  display: 'flex',
+  justifyContent: 'center',
+  paddingTop: '30px',
+  paddingBottom: '30px',
+};
+
 interface AppState {
   imageData?: string;
-  output: null | string;
+  isNormal: null | boolean;
   isUploadButtonActive: boolean;
-  visualizationInfo: VisualizationInfo[];
 }
 
 class App extends React.Component<{}, AppState> {
   state: AppState = {
-    output: null,
+    isNormal: null,
     isUploadButtonActive: true,
-    visualizationInfo: [],
   };
 
   pictureRef: React.RefObject<HTMLCanvasElement> = React.createRef();
@@ -54,34 +52,26 @@ class App extends React.Component<{}, AppState> {
       ctx.drawImage(image, 0, 0, 224, 224);
       const imageData = canvas.toDataURL('image/jpeg');
       if (imageData !== this.state.imageData) {
-        this.classify(imageData);
+        (async () => {
+          const init = {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ data: imageData }),
+          };
+          const output = await makeRequest('classify', c => c, init);
+
+          await this.setState({
+            isNormal: output === 'normal',
+            isUploadButtonActive: true,
+            imageData,
+          });
+
+          drawArrow(this.lastArrowRef.current!);
+        })();
       }
     };
-  };
-
-  classify = async (data: string) => {
-    const callback = (context: string) => context;
-    const init = {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ data }),
-    };
-    const output = await makeRequest('classify', callback, init);
-    const visualizationInfo = await makeRequest(
-      'network-layout',
-      parseNetworkLayout
-    );
-
-    await this.setState({
-      visualizationInfo,
-      output,
-      isUploadButtonActive: true,
-      imageData: data,
-    });
-
-    drawArrow(this.lastArrowRef.current!);
   };
 
   render() {
@@ -90,11 +80,8 @@ class App extends React.Component<{}, AppState> {
         <div style={bodyStyle}>
           <div style={{ marginBottom: 40 }}>
             <h1 style={{ fontSize: '40px', marginBottom: 0 }}>
-              What makes a flower its kind?
+              TODO: Title Here!
             </h1>
-            <p style={{ marginTop: 5 }}>
-              Rose is red; violet is blue; Which pixels activate your ReLU
-            </p>
           </div>
           <div style={{ display: 'flex', justifyContent: 'center' }}>
             <canvas
@@ -104,35 +91,15 @@ class App extends React.Component<{}, AppState> {
               style={{ borderStyle: 'dotted', padding: '2px' }}
             />
           </div>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              paddingTop: '30px',
-              paddingBottom: '30px',
-            }}
-          >
+          <div style={blockStyle}>
             <UploadButton
               onClick={this.handleFileUpload}
               isActive={this.state.isUploadButtonActive}
             />
           </div>
-          <NetworkVisualization
-            visualizationInfo={this.state.visualizationInfo}
-            imageData={this.state.imageData}
-          />
-          {this.state.output ? (
-            <div style={layerRootStyle}>
-              <div
-                style={{
-                  justifyContent: 'right',
-                  ...layerThinDivStyle,
-                }}
-              >
-                <div style={{ marginRight: '10px' }}>Classification Layers</div>
-              </div>
+          {this.state.isNormal !== null ? (
+            <div style={blockStyle}>
               <canvas ref={this.lastArrowRef} width="80" height="80" />
-              <div style={layerThinDivStyle} />
             </div>
           ) : null}
           <div
@@ -140,11 +107,34 @@ class App extends React.Component<{}, AppState> {
               display: 'flex',
               justifyContent: 'center',
               fontSize: 50,
-              marginBottom: 250,
+              marginBottom: 20,
             }}
           >
-            {this.state.output ? `This picture is ${this.state.output}!` : ''}
+            {this.state.isNormal !== null
+              ? this.state.isNormal
+                ? 'This lung is normal!'
+                : 'This lung is infected with pneumonia :('
+              : ''}
           </div>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              marginTop: 20,
+              marginBottom: 20,
+            }}
+          >
+            {this.state.isNormal !== null
+              ? `Example pictures of ${
+                  this.state.isNormal
+                    ? 'normal lungs'
+                    : 'lungs with pneumonia infection'
+                }`
+              : null}{' '}
+          </div>
+          {this.state.isNormal !== null ? (
+            <ExampleImages isNormal={this.state.isNormal} N={3} />
+          ) : null}
         </div>
       </div>
     );
