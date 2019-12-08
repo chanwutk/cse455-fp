@@ -1,7 +1,7 @@
 import os
 import re
 
-from src.networks import PneumoniaVGG
+from src.networks import SavableAlexNet
 from src.data_loaders import load_base64_image, load_classes
 from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
@@ -16,11 +16,11 @@ cors = CORS(
 
 cwd = os.getcwd()
 weights_path = os.path.join(cwd, "data/weights.pt")
-dataset_dir = os.path.join(cwd, "data/chest_xray")
+dataset_dir = os.path.join(cwd, "data/brain_tumor_mri")
 
-model = PneumoniaVGG()
+class_names = load_classes("mri_class_names.txt")
+model = SavableAlexNet(num_classes=len(class_names))
 model.load_model(weights_path)
-class_names = load_classes("class_names.txt")
 
 
 @app.route("/classify", methods=["POST"])

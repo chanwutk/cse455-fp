@@ -5,7 +5,7 @@ import torch.optim as optim
 import numpy as np
 
 from os import path
-from src.networks import PneumoniaVGG
+from src.networks import SavableAlexNet, SavableVGG
 from src.data_loaders import load_dataset, load_classes
 
 
@@ -133,10 +133,10 @@ def main():
 
     kwargs = {"num_workers": 0, "pin_memory": True} if use_cuda else {}
 
-    class_names = load_classes()
+    class_names = load_classes("kermany_class_names.txt")
 
-    data_train = load_dataset(path.join(DATA_PATH, "chest_xray/train"))
-    data_test = load_dataset(path.join(DATA_PATH, "chest_xray/test"))
+    data_train = load_dataset(path.join(DATA_PATH, "kermany2018/train"))
+    data_test = load_dataset(path.join(DATA_PATH, "kermany2018/test"))
     train_loader = torch.utils.data.DataLoader(
         data_train, batch_size=BATCH_SIZE, shuffle=True, **kwargs
     )
@@ -144,7 +144,7 @@ def main():
         data_test, batch_size=TEST_BATCH_SIZE, shuffle=False, **kwargs
     )
 
-    model = PneumoniaVGG().to(device)
+    model = SavableAlexNet(num_classes=len(class_names)).to(device)
     optimizer = optim.SGD(
         model.parameters(),
         lr=LEARNING_RATE,

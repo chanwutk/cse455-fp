@@ -43,15 +43,15 @@ class PreMadeNetwork(BaseSavableNet):
         return self.net.forward(input_tensor)
 
 
-class PneumoniaAlexNet(PreMadeNetwork):
-    def __init__(self):
-        super(PneumoniaAlexNet, self).__init__(
-            models.alexnet(pretrained=False, num_classes=2)
+class SavableAlexNet(PreMadeNetwork):
+    def __init__(self, num_classes: int):
+        super(SavableAlexNet, self).__init__(
+            models.alexnet(pretrained=False, num_classes=num_classes)
         )
 
 
-class PneumoniaVGG(PreMadeNetwork):
-    def __init__(self):
-        super(PneumoniaVGG, self).__init__(
-            models.vgg19_bn(pretrained=False, num_classes=2)
+class SavableVGG(PreMadeNetwork):
+    def __init__(self, num_classes: int):
+        super(SavableVGG, self).__init__(
+            models.vgg19_bn(pretrained=False, num_classes=num_classes)
         )
