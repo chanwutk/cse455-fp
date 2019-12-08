@@ -157,9 +157,10 @@ export const writeBase64ToCanvas = (
   size: number
 ) => {
   const ctx = canvas.getContext('2d')!;
-  ctx.imageSmoothingEnabled = false;
+  // ctx.imageSmoothingEnabled = false;
   const image = new Image();
-  image.onload = () => ctx.drawImage(image, 0, 0, size, size);
+  image.onload = () =>
+    ctx.drawImage(image, 0, 0, image.width, image.height, 0, 0, size, size);
   image.src = 'data:image/jpeg;base64,' + data;
 };
 

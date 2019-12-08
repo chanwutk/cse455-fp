@@ -3,6 +3,8 @@ import './App.css';
 import UploadButton from './components/UploadButton';
 import { CANVAS_MAX_WIDTH, makeRequest, drawArrow } from './utils';
 import ExampleImages from './components/ExampleImages';
+import IFFValid from './components/IFFValid';
+import MaskedImages from './components/MaskedImages';
 
 const rootStyle: React.CSSProperties = {
   width: '100%',
@@ -30,18 +32,21 @@ interface AppState {
   imageData?: string;
   isNormal: null | boolean;
   isUploadButtonActive: boolean;
+  masks: null | string[];
 }
 
 class App extends React.Component<{}, AppState> {
   state: AppState = {
     isNormal: null,
     isUploadButtonActive: true,
+    masks: null,
   };
 
   pictureRef: React.RefObject<HTMLCanvasElement> = React.createRef();
   lastArrowRef: React.RefObject<HTMLCanvasElement> = React.createRef();
 
   handleFileUpload = (event: any) => {
+    this.setState({ isUploadButtonActive: false, masks: null, isNormal: null });
     const file = event.target.files[0];
     const src = URL.createObjectURL(file);
     const image = new Image();
@@ -60,12 +65,13 @@ class App extends React.Component<{}, AppState> {
             },
             body: JSON.stringify({ data: imageData }),
           };
-          const output = await makeRequest('classify', c => c, init);
+          const output = await makeRequest('classify', JSON.parse, init);
 
           await this.setState({
-            isNormal: output === 'normal',
+            isNormal: output.output === 'normal',
             isUploadButtonActive: true,
             imageData,
+            masks: output.masks,
           });
 
           drawArrow(this.lastArrowRef.current!);
@@ -97,44 +103,40 @@ class App extends React.Component<{}, AppState> {
               isActive={this.state.isUploadButtonActive}
             />
           </div>
-          {this.state.isNormal !== null ? (
+
+          <IFFValid validate={this.state.isNormal}>
             <div style={blockStyle}>
               <canvas ref={this.lastArrowRef} width="80" height="80" />
             </div>
-          ) : null}
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              fontSize: 50,
-              marginBottom: 20,
-            }}
-          >
-            {this.state.isNormal !== null
-              ? this.state.isNormal
+          </IFFValid>
+          <IFFValid validate={this.state.isNormal}>
+            <div
+              style={{
+                fontSize: 50,
+                marginBottom: 20,
+              }}
+            >
+              {this.state.isNormal
                 ? 'This lung is normal!'
-                : 'This lung is infected with pneumonia :('
-              : ''}
-          </div>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              marginTop: 20,
-              marginBottom: 20,
-            }}
-          >
-            {this.state.isNormal !== null
-              ? `Example pictures of ${
-                  this.state.isNormal
-                    ? 'normal lungs'
-                    : 'lungs with pneumonia infection'
-                }`
-              : null}{' '}
-          </div>
-          {this.state.isNormal !== null ? (
-            <ExampleImages isNormal={this.state.isNormal} N={3} />
-          ) : null}
+                : 'This lung is infected with pneumonia'}
+            </div>
+          </IFFValid>
+          <IFFValid validate={this.state.isNormal}>
+            <div style={{ marginTop: 20 }}>
+              {`Example pictures of ${
+                this.state.isNormal
+                  ? 'normal lungs'
+                  : 'lungs with pneumonia infection'
+              }`}
+            </div>
+          </IFFValid>
+          <IFFValid validate={this.state.isNormal}>
+            <ExampleImages isNormal={this.state.isNormal!} N={3} />
+          </IFFValid>
+          <IFFValid validate={this.state.isNormal}>
+            <div style={{ margin: 20 }}>Activated zones of the input</div>
+          </IFFValid>
+          <MaskedImages masks={this.state.masks} />
         </div>
       </div>
     );

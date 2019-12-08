@@ -131,7 +131,13 @@ def main():
     device = torch.device("cuda" if use_cuda else "cpu")
     print("Using device", device)
 
-    kwargs = {"num_workers": 0, "pin_memory": True} if use_cuda else {}
+    import multiprocessing
+
+    kwargs = (
+        {"num_workers": multiprocessing.cpu_count(), "pin_memory": True}
+        if use_cuda
+        else {}
+    )
 
     class_names = load_classes("kermany_class_names.txt")
 
