@@ -67,16 +67,10 @@ class TraceableSequential(nn.Sequential):
         if self.traceable:
             self.traces = []
         for module in self._modules.values():
-            module_input = None
-            if self.traceable:
-                module_input = input_tensor.detach()
             input_tensor = module(input_tensor)
             if self.traceable:
                 module_output = input_tensor.detach()
-                weight = None
-                if hasattr(module, "weight") and len(module.weight.size()) == 4:
-                    weight = module.weight.detach()
-                self.traces.append((module_input, module_output, module, weight))
+                self.traces.append(module_output)
         return input_tensor
 
     def get_traces(self):

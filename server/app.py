@@ -38,7 +38,7 @@ def classify():
     output = {
         "output": class_names[class_idx.item()],
         "masks": mask_input_with_outputs(
-            load_base64_image(data, do_normalize=False), trace, 15
+            load_base64_image(data, do_normalize=False), trace
         ),
     }
     return jsonify(output)

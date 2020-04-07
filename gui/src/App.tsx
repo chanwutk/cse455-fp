@@ -86,7 +86,7 @@ class App extends React.Component<{}, AppState> {
         <div style={bodyStyle}>
           <div style={{ marginBottom: 40 }}>
             <h1 style={{ fontSize: '40px', marginBottom: 0 }}>
-              TODO: Title Here!
+              Is the lung infected with Pneumonia?
             </h1>
           </div>
           <div style={{ display: 'flex', justifyContent: 'center' }}>

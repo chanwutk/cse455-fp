@@ -60,17 +60,15 @@ def mask_input_with_output(image: torch.Tensor, output: torch.Tensor):
     # ones = torch.zeros_like(output)
     # output = torch.cat([ones, output, ones], 1)
     # output = ones - output
-    return pil_to_base64(
-        TF.to_pil_image((image * output).squeeze(dim=0))
-    )
+    return pil_to_base64(TF.to_pil_image((image * output).squeeze(dim=0)))
 
 
-def mask_input_with_outputs(image, trace, num):
+def mask_input_with_outputs(image, trace):
     output = []
     # bound = trace[1].size()[1]
     # channel = random.sample(range(0, bound), num)
     # for c in channel:
     for c in range(trace[1].size()[1]):
-        masked = mask_input_with_output(image, trace[1][:, c : c + 1, :, :])
+        masked = mask_input_with_output(image, trace[:, c : c + 1, :, :])
         output.append(masked)
     return output
